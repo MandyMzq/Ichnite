@@ -209,8 +209,8 @@ def main():
         now=time.time()-pause_time
         dt=now-last_time # calculate the time period between two prints
         last_time=now # record the new output timestamp 
-        if tree_speed!=15:
-            clock+=1    
+        # if tree_speed!=15:
+        clock+=1    
         tree_speed=min(5+0.010*clock,15)
         # print(clock," ",tree_speed," ",g," ",dino_speed)
         
