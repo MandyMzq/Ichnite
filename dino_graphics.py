@@ -9,6 +9,8 @@ random.seed(seed)
 # import sys, termios, tty
 from graphics import *                      
 
+dino_x=0
+dino_y=0
 extra_life=2
 gmPause=False
 gmDeath=False
@@ -29,15 +31,62 @@ dino_feet=0
 win = None
 grace_period=0
 
-def pause():
+
+img=PILImage.open("dino0.png").convert("RGBA")
+img1=PILImage.open("dino1.png").convert("RGBA")
+img2=PILImage.open("dino2.png").convert("RGBA")
+    # img = img.resize((col_dino, row_dino))  # 例如 (60, 60)
+img.save("dino_small.png") 
+img1.save("dino_small1.png") 
+img2.save("dino_small2.png") 
+
+dino_img=Image(Point(dino_x, dino_y), "dino_small.png")
+dino_img1=Image(Point(dino_x, dino_y), "dino_small1.png")
+dino_img2=Image(Point(dino_x, dino_y), "dino_small2.png")
+
+def restart_program():
+    """restart the current program, with file objects and descriptors"""
+    
+
+    python = sys.executable
+    os.execl(python, python, *sys.argv)
+
+def save_score(clock):
+    highest_score = open("high_score.txt", "r")
+    high_score_num = highest_score.read()
+
+    highest_score = open("high_score.txt", "w")
+    highest_score.write (str(max(int(high_score_num),clock-1)))
+    highest_score.close()
+
+def pause(clock):
     global gmPause
     pause_time=0
+    rect,menu_text,info_text,score,resume,retry=print_menu(clock)
+    rect.draw(win)
+    menu_text.draw(win)
+    info_text.draw(win)
+    score.draw(win)
+    resume.draw(win)
+    retry.draw(win)
+
+
     while gmPause==1:
         pause_time+=0.1
         key = win.checkKey()
+        if key=='r' or key=='R':
+            save_score(clock)
+            restart_program()
+
         if key=='Escape':
             gmPause=0
         time.sleep(0.1) 
+    rect.undraw()
+    menu_text.undraw()
+    info_text.undraw()
+    score.undraw()
+    resume.undraw()
+    retry.undraw()
     return pause_time
     
 def add_tree(trees):
@@ -56,9 +105,8 @@ def add_tree(trees):
     tree_img.draw(win)
     trees.append((tree_img, img, col_tree, row_tree))
     # print(dino_y," ",dino_x," ",land)
-  
+
 def dino_death(dino_img, w1, h1, tree_img, tree_pil, w2, h2):
-    """像素级碰撞检测"""
     x1,y1=dino_img.getAnchor().getX(),dino_img.getAnchor().getY()
     x2,y2=tree_img.getAnchor().getX(),tree_img.getAnchor().getY()
 
@@ -103,16 +151,18 @@ def dino_death(dino_img, w1, h1, tree_img, tree_pil, w2, h2):
                 return True  
     return False
 
-def death_win(win):
+def death_win(win,clock):
     global gmDeath,grace_period,extra_life
     pause_time=0
 
-    rect,wasted_text,info_text,resume=show_wasted(win,extra_life)
+    rect,wasted_text,info_text,score,resume,retry=show_wasted(win,extra_life,clock)
     extra_life-=1
     rect.draw(win)
     wasted_text.draw(win)
     info_text.draw(win)
+    score.draw(win)
     resume.draw(win)
+    retry.draw(win)
 
     while gmDeath==1:
         pause_time+=0.1
@@ -120,76 +170,143 @@ def death_win(win):
         if key=='Return':
             gmDeath=0
             break
+        if key=='r' or key=='R':
+            save_score(clock)
+            restart_program()
         
         time.sleep(0.1) 
-    grace_period=50
+    grace_period=40
 
     rect.undraw()
     wasted_text.undraw()
     info_text.undraw()
+    score.undraw()
     resume.undraw()
+    retry.undraw()
 
     return pause_time
 
-def show_wasted(win,extra_life):
+def show_wasted(win,extra_life,clock):
     width=win.width
     height=win.height
 
     # background rectangle
-    rect=Rectangle(Point(width/2-150,height/2-60),
-                    Point(width/2+150,height/2+60))
+    rect=Rectangle(Point(width/2-150,height/2-80),
+                    Point(width/2+150,height/2+80))
     rect.setFill(color_rgb(30,30,30))  # dark gray
     rect.setOutline("red")
     rect.setWidth(3)
 
     # “WASTED”
-    wasted_text=Text(Point(width/2,height/2-20),"WASTED")
+    wasted_text=Text(Point(width/2,height/2-40),"WASTED")
     wasted_text.setSize(24)
     wasted_text.setTextColor("red")
+    wasted_text.setFace("courier")  
     wasted_text.setStyle("bold")
         
     # “Extra Life”
-    info_text=Text(Point(width/2,height/2+10), f"Extra Life: {extra_life}")
+    info_text=Text(Point(width/2,height/2-10), f"Extra Life: {extra_life}")
     info_text.setSize(16)
+    info_text.setFace("courier")  
     info_text.setTextColor("white")
 
-    resume=Text(Point(width/2,height/2+35), f"Press Enter to resume.")
+    score=Text(Point(width/2,height/2+15), f"Score: {clock-1}")
+    score.setSize(16)
+    score.setFace("courier")  
+    score.setTextColor("white")
+
+    resume=Text(Point(width/2,height/2+40), f"Press Esc to resume.")
     resume.setSize(9)
+    resume.setFace("courier")  
     resume.setTextColor("white") 
-    return rect,wasted_text,info_text,resume
+
+    retry=Text(Point(width/2,height/2+50), f"Press R to restart.")
+    retry.setSize(9)
+    retry.setFace("courier")  
+    retry.setTextColor("white") 
+    return rect,wasted_text,info_text,score,resume,retry
+
+def print_menu(clock):
+    width=win.width
+    height=win.height
+
+    # background rectangle
+    rect=Rectangle(Point(width/2-120,height/2-80),
+                    Point(width/2+120,height/2+80))
+    rect.setFill(color_rgb(30,30,30))  # dark gray
+    rect.setOutline("green")
+    rect.setWidth(3)
+
+    # “MENU”
+    menu_text=Text(Point(width/2,height/2-40),"MENU")
+    menu_text.setSize(24)
+    menu_text.setTextColor("green")
+    menu_text.setFace("courier")  
+    menu_text.setStyle("bold")
+
+    # “Extra Life”
+    info_text=Text(Point(width/2,height/2-10), f"Remaining Life: {extra_life+1}")
+    info_text.setSize(16)
+    info_text.setFace("courier")  
+    info_text.setTextColor("white")
+
+    score=Text(Point(width/2,height/2+15), f"Score: {clock-1}")
+    score.setSize(16)
+    score.setFace("courier")  
+    score.setTextColor("white")
+
+
+    resume=Text(Point(width/2,height/2+40), f"Press Esc to resume.")
+    resume.setSize(9)
+    resume.setFace("courier")  
+    resume.setTextColor("white") 
+
+    retry=Text(Point(width/2,height/2+50), f"Press R to restart.")
+    retry.setSize(9)
+    retry.setFace("courier")  
+    retry.setTextColor("white") 
+
+    return rect,menu_text,info_text,score,resume,retry
+
+    print(contents)
+
+def update_dino(clock):
+    global dino_x,dino_y,dino_img
+    if 1:
+        if clock%2==1:
+            dino_nxt=Image(Point(dino_x, dino_y), "dino_small1.png")
+            dino_nxt.draw(win)
+            dino_img.undraw()
+            dino_img=dino_nxt
+        else:
+            dino_nxt=Image(Point(dino_x, dino_y), "dino_small2.png")
+            dino_nxt.draw(win)
+            dino_img.undraw()
+            dino_img=dino_nxt
 
 def main():
-    global gmJump,gmPause,gmDeath,win,last_time,grace_period
+    global gmJump,gmPause,gmDeath,win,last_time,grace_period,dino_x,dino_y,dino_img
 
     win=GraphWin("2D Array Animation", col, row)
     win.setBackground("white")
 
-    # draw the dinosaur
-    img=PILImage.open("dino.png").convert("RGBA")
-    # img = img.resize((col_dino, row_dino))  # 例如 (60, 60)
-    img.save("dino_small.png") 
+
+    # =============== initial output ================
+    # ============draw the dinosaur=========
+    
     col_dino,row_dino=img.size
     dino_y=(land-row_dino/2) 
     dino_x=(dino_pos+col_dino/2-1)
-    dino_img=Image(Point(dino_x, dino_y), "dino_small.png")
     dino_img.draw(win)
     # print(dino_y," ",dino_x," ",land)
-
-    # img = PILImage.open(chosen_file).convert("RGBA")
-    # # img = img.resize((col_tree, row_tree))  # 例如 (60, 60)
-    # temp_name = f"tree_temp_{random.randint(0,9999)}.png"
-    # tree_y = (land-row_tree/2)  
-    # tree_x = (col-(col_tree/2)-1)
-    # tree_img = Image(Point(tree_x, tree_y), temp_name)
-    # tree_img.draw(win)
     
-    # draw the land
+    # =============draw the land==========
     ground_y=land 
     ground_line=Line(Point(0,ground_y),Point(col,ground_y))
     ground_line.setFill("black")
     ground_line.draw(win)
 
-
+    # =============initialization of variables==========
     x=0
     y=0
     clock=0
@@ -203,7 +320,29 @@ def main():
     pause_time=0
     tree_speed=0
     i=0
+    
+    # =============print current score==========
+    current_score = Text(Point(120, 20), f"current score:{clock}")  # 初始文字
+    current_score.setSize(16)
+    current_score.draw(win)
+    current_score.setFace("courier")  
+
+    # =============get and print highest score==========
+    highest_score= open("high_score.txt", "r")
+    high_score_num = highest_score.read()
+    highest_score.close()
+    high_score = Text(Point(320, 20), f"highest score:{high_score_num}")  # 初始文字
+    high_score.setSize(16)
+    high_score.draw(win)
+    high_score.setFace("courier")  
+
     while win.checkMouse() is None :
+        current_score.setText(f"current score: {clock}")
+        high_score_num = max(int(high_score_num),clock)
+        high_score.setText(f"highest score:{high_score_num}")
+        # update_dino(clock)
+        
+
         i+=1
          # update the moving distance with real_time - pause_time, otherwise the tree will suddenly disappear after pausing
         now=time.time()-pause_time
@@ -215,7 +354,7 @@ def main():
         # print(clock," ",tree_speed," ",g," ",dino_speed)
         
         # =============== randomly add the tree ================
-        if ((clock%random.randint(40, 50)==0 and clock-last_tree>=min(25+cnt_tree/5,50) or clock-last_tree>=60)):
+        if ((clock-last_tree>=random.randint(10,15) or clock-last_tree>=30)):
             add_tree(trees)
             last_tree=clock
             cnt_tree+=1
@@ -229,7 +368,7 @@ def main():
         key=win.checkKey()
         if key=='Escape':
             gmPause=1
-            pause_time+=pause()
+            pause_time+=pause(clock)
 
         # =========== jump when 'space' is inputed ========= 
         dino_feet=dino_img.getAnchor().getY()+(row_dino)/2
@@ -238,20 +377,29 @@ def main():
             gmJump=0
             g=0 
         elif gmJump==0 and key=='space':
+            # grace_period=0
             gmJump=1
-            g=3
-            dino_speed=-24
+            g=10
+            dino_speed=-40
             # print("%%%")
         # print()
-
         dino_speed+=g
         print(dino_speed," ",dino_feet)
         if gmJump==1:
             dino_dx=(dino_speed)
+            dino_y+=dino_dx
             dino_img.move(0,dino_dx)
             print(dino_dx)
             # dino_speed+=g*dt
+        # =============== move the trees =============== 
         
+        print(tree_speed)
+        tree_dx=-tree_speed*dt*60   # 以 60fps 标准化速度
+        for tree_img, tree_pli, col_tree, row_tree in trees:
+            tree_img.move(tree_dx,0)
+            if tree_img.getAnchor().getX()+30<-col_tree:
+                trees.remove((tree_img, tree_pli, col_tree, row_tree))
+
         # ========= check whether the dinosaur died ========= 
         print(grace_period)
         if len(trees)>0:
@@ -259,27 +407,38 @@ def main():
             if grace_period==0 and dino_death(dino_img,col_dino,row_dino,tree_img,tree_pli,col_tree,row_tree):
                 gmDeath=1
                 # print("%%%%%%%%%%%%%%%%%%%")
-                death_win(win)
+                death_win(win,clock)
                 if extra_life==-1:
                     break
-        if grace_period>0: 
-            if grace_period%10==0:
-                dino_img.undraw()
-            elif grace_period%10==5:
-                dino_img.draw(win)
-            grace_period-=1
 
-        # =============== move the trees =============== 
+
+        # =============== update the dinosaur ===============
         
-        tree_dx=-tree_speed*dt*60   # 以 60fps 标准化速度
-        for tree_img, tree_pli, col_tree, row_tree in trees:
-            tree_img.move(tree_dx,0)
-            if tree_img.getAnchor().getX()+30<-col_tree:
-                trees.remove((tree_img, tree_pli, col_tree, row_tree))
+        if grace_period==0:
+            update_dino(clock)
+        elif grace_period>0: 
+            if grace_period%4==0:
+                dino_nxt=Image(Point(dino_x, dino_y), "dino_trans.png")
+                dino_nxt.draw(win)
+                dino_img.undraw()
+                dino_img=dino_nxt
+            elif grace_period%4==2:
+                if clock%2==0:
+                    dino_nxt=Image(Point(dino_x, dino_y), "dino_small2.png")
+                else:
+                    dino_nxt=Image(Point(dino_x, dino_y), "dino_small1.png")
+                dino_nxt.draw(win)
+                dino_img.undraw()
+                dino_img=dino_nxt
+            elif grace_period%4<2:
+                update_dino(clock)
+            grace_period-=1
+        
 
-        # =============== print the score ===============
+        
+        # =============== record the score ===============
     win.close()
+    save_score(clock)
 
 if __name__=='__main__':
     main()
-
