@@ -52,14 +52,17 @@ def restart_program():
     os.execl(python, python, *sys.argv)
 
 def save_score(clock):
+    """this is where the highest score is saved
+        clock-1 = current score """
     highest_score = open("high_score.txt", "r")
     high_score_num = highest_score.read()
 
     highest_score = open("high_score.txt", "w")
-    highest_score.write (str(max(int(high_score_num),clock-1)))
+    highest_score.write (str(max(int(high_score_num),clock-1))) 
     highest_score.close()
 
 def pause(clock):
+    """ when the game is paused, the game goes to "sleep" and the menu pops up """
     global gmPause
     pause_time=0
     rect,menu_text,info_text,score,resume,retry=print_menu(clock)
@@ -90,6 +93,7 @@ def pause(clock):
     return pause_time
     
 def add_tree(trees):
+    """the system will randomly select trees to pop up"""
     tree_files = ["tree1.png", "tree2.png", "tree3.png", "tree4.png","tree11.png", "tree12.png", "tree13.png", "tree14.png","tree21.png"]
     chosen_file = random.choice(tree_files)
     global col,land
@@ -107,6 +111,9 @@ def add_tree(trees):
     # print(dino_y," ",dino_x," ",land)
 
 def dino_death(dino_img, w1, h1, tree_img, tree_pil, w2, h2):
+    """ this system checks when the dinosaur and a tree overlaps and if they do
+        overlap generally (by length and width of their image) and the system
+        wont count for the transparent pixels that do overlap"""
     x1,y1=dino_img.getAnchor().getX(),dino_img.getAnchor().getY()
     x2,y2=tree_img.getAnchor().getX(),tree_img.getAnchor().getY()
 
@@ -152,6 +159,10 @@ def dino_death(dino_img, w1, h1, tree_img, tree_pil, w2, h2):
     return False
 
 def death_win(win,clock):
+    """ there's a while loop that checks for the player's keyboard input,
+        if they select return the game starts again
+        if they selet 'r'/'R' the game restarts
+        otherwise the wasted menu stays on the screen """
     global gmDeath,grace_period,extra_life
     pause_time=0
 
@@ -187,6 +198,7 @@ def death_win(win,clock):
     return pause_time
 
 def show_wasted(win,extra_life,clock):
+    """ defines the wasted window (the font, coloring, size) """
     width=win.width
     height=win.height
 
@@ -227,6 +239,7 @@ def show_wasted(win,extra_life,clock):
     return rect,wasted_text,info_text,score,resume,retry
 
 def print_menu(clock):
+    """ defines the pause window (the font, coloring, size) """
     width=win.width
     height=win.height
 
@@ -271,6 +284,9 @@ def print_menu(clock):
     print(contents)
 
 def update_dino(clock):
+    """ the movement of the dinosuar
+         when the clock is odd, left leg is up
+         when the clock is even, right led is up """
     global dino_x,dino_y,dino_img
     if 1:
         if clock%2==1:
@@ -285,6 +301,10 @@ def update_dino(clock):
             dino_img=dino_nxt
 
 def main():
+    """ there's a big while loop, the system sleeps for every transversal
+        allowing the users to have their eye adjusted to the updates on the screen
+        Every transversal there's an update for every function (trees, dinosaur, pause/death screens, and jump)"""
+
     global gmJump,gmPause,gmDeath,win,last_time,grace_period,dino_x,dino_y,dino_img
 
     win=GraphWin("2D Array Animation", col, row)
