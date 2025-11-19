@@ -52,23 +52,27 @@ def restart_program():
     os.execl(python, python, *sys.argv)
 
 def save_score(clock):
+    """this is where the highest score is saved
+        clock-1 = current score """
     highest_score = open("high_score.txt", "r")
     high_score_num = highest_score.read()
 
     highest_score = open("high_score.txt", "w")
-    highest_score.write (str(max(int(high_score_num),clock-1)))
+    highest_score.write (str(max(int(high_score_num),clock-1))) 
     highest_score.close()
 
 def pause(clock):
+    """ when the game is paused, the game goes to "sleep" and the menu pops up """
     global gmPause
     pause_time=0
-    rect,menu_text,info_text,score,resume,retry=print_menu(clock)
+    rect,menu_text,info_text,score,resume,retry,rank=print_menu(clock)
     rect.draw(win)
     menu_text.draw(win)
     info_text.draw(win)
     score.draw(win)
     resume.draw(win)
     retry.draw(win)
+    rank.draw(win)
 
 
     while gmPause==1:
@@ -77,7 +81,8 @@ def pause(clock):
         if key=='r' or key=='R':
             save_score(clock)
             restart_program()
-
+        if key=='a'or key=='A':
+            ranking(clock)
         if key=='Escape':
             gmPause=0
         time.sleep(0.1) 
@@ -87,9 +92,11 @@ def pause(clock):
     score.undraw()
     resume.undraw()
     retry.undraw()
+    rank.undraw()
     return pause_time
     
 def add_tree(trees):
+    """the system will randomly select trees to pop up"""
     tree_files = ["tree1.png", "tree2.png", "tree3.png", "tree4.png","tree11.png", "tree12.png", "tree13.png", "tree14.png","tree21.png"]
     chosen_file = random.choice(tree_files)
     global col,land
@@ -107,6 +114,9 @@ def add_tree(trees):
     # print(dino_y," ",dino_x," ",land)
 
 def dino_death(dino_img, w1, h1, tree_img, tree_pil, w2, h2):
+    """ this system checks when the dinosaur and a tree overlaps and if they do
+        overlap generally (by length and width of their image) and the system
+        wont count for the transparent pixels that do overlap"""
     x1,y1=dino_img.getAnchor().getX(),dino_img.getAnchor().getY()
     x2,y2=tree_img.getAnchor().getX(),tree_img.getAnchor().getY()
 
@@ -152,10 +162,14 @@ def dino_death(dino_img, w1, h1, tree_img, tree_pil, w2, h2):
     return False
 
 def death_win(win,clock):
+    """ there's a while loop that checks for the player's keyboard input,
+        if they select return the game starts again
+        if they selet 'r'/'R' the game restarts
+        otherwise the wasted menu stays on the screen """
     global gmDeath,grace_period,extra_life
     pause_time=0
 
-    rect,wasted_text,info_text,score,resume,retry=show_wasted(win,extra_life,clock)
+    rect,wasted_text,info_text,score,resume,retry,rank=show_wasted(win,extra_life,clock)
     extra_life-=1
     rect.draw(win)
     wasted_text.draw(win)
@@ -163,6 +177,7 @@ def death_win(win,clock):
     score.draw(win)
     resume.draw(win)
     retry.draw(win)
+    rank.draw(win)
 
     while gmDeath==1:
         pause_time+=0.1
@@ -173,6 +188,8 @@ def death_win(win,clock):
         if key=='r' or key=='R':
             save_score(clock)
             restart_program()
+        if key=='a'or key=='A':
+            ranking(clock)
         
         time.sleep(0.1) 
     grace_period=40
@@ -183,10 +200,12 @@ def death_win(win,clock):
     score.undraw()
     resume.undraw()
     retry.undraw()
+    rank.undraw()
 
     return pause_time
 
 def show_wasted(win,extra_life,clock):
+    """ defines the wasted window (the font, coloring, size) """
     width=win.width
     height=win.height
 
@@ -210,23 +229,29 @@ def show_wasted(win,extra_life,clock):
     info_text.setFace("courier")  
     info_text.setTextColor("white")
 
-    score=Text(Point(width/2,height/2+15), f"Score: {clock-1}")
+    score=Text(Point(width/2,height/2+10), f"Score: {clock-1}")
     score.setSize(16)
     score.setFace("courier")  
     score.setTextColor("white")
 
-    resume=Text(Point(width/2,height/2+40), f"Press Esc to resume.")
+    resume=Text(Point(width/2,height/2+30), f"Press Return to resume.")
     resume.setSize(9)
     resume.setFace("courier")  
     resume.setTextColor("white") 
 
-    retry=Text(Point(width/2,height/2+50), f"Press R to restart.")
+    retry=Text(Point(width/2,height/2+40), f"Press R to restart.")
     retry.setSize(9)
     retry.setFace("courier")  
     retry.setTextColor("white") 
-    return rect,wasted_text,info_text,score,resume,retry
+
+    rank=Text(Point(width/2,height/2+50), f"Press A to see your ranking.")
+    rank.setSize(9)
+    rank.setFace("courier")  
+    rank.setTextColor("white") 
+    return rect,wasted_text,info_text,score,resume,retry,rank
 
 def print_menu(clock):
+    """ defines the pause window (the font, coloring, size) """
     width=win.width
     height=win.height
 
@@ -245,32 +270,40 @@ def print_menu(clock):
     menu_text.setStyle("bold")
 
     # “Extra Life”
-    info_text=Text(Point(width/2,height/2-10), f"Remaining Life: {extra_life+1}")
+    info_text=Text(Point(width/2,height/2-15), f"Remaining Life: {extra_life+1}")
     info_text.setSize(16)
     info_text.setFace("courier")  
     info_text.setTextColor("white")
 
-    score=Text(Point(width/2,height/2+15), f"Score: {clock-1}")
+    score=Text(Point(width/2,height/2+5), f"Score: {clock-1}")
     score.setSize(16)
     score.setFace("courier")  
     score.setTextColor("white")
 
 
-    resume=Text(Point(width/2,height/2+40), f"Press Esc to resume.")
+    resume=Text(Point(width/2,height/2+30), f"Press Esc to resume.")
     resume.setSize(9)
     resume.setFace("courier")  
     resume.setTextColor("white") 
 
-    retry=Text(Point(width/2,height/2+50), f"Press R to restart.")
+    retry=Text(Point(width/2,height/2+40), f"Press R to restart.")
     retry.setSize(9)
     retry.setFace("courier")  
     retry.setTextColor("white") 
 
-    return rect,menu_text,info_text,score,resume,retry
+    rank=Text(Point(width/2,height/2+50), f"Press A to see your ranking.")
+    rank.setSize(9)
+    rank.setFace("courier")  
+    rank.setTextColor("white") 
 
-    print(contents)
+    return rect,menu_text,info_text,score,resume,retry,rank
+
+    # print(contents)
 
 def update_dino(clock):
+    """ the movement of the dinosuar
+         when the clock is odd, left leg is up
+         when the clock is even, right led is up """
     global dino_x,dino_y,dino_img
     if 1:
         if clock%2==1:
@@ -284,7 +317,69 @@ def update_dino(clock):
             dino_img.undraw()
             dino_img=dino_nxt
 
+def ranking(clock):
+    """ this function is to show the ranking of the players based on their highest scores
+        it reads from the high_score.txt file and sorts the scores in descending order
+        then it displays the top 5 scores on the screen """
+    ranking = []
+    highest_score = open("high_score.txt", "r")
+    high_score_num = highest_score.read()
+    with open("ranking.txt", "r") as f:
+        for line in f:
+            parts = line.strip().split()
+            if len(parts) == 2:
+                id_, score = parts
+                ranking.append((id_, int(score)))
+    ranking.append(("You", max(int(high_score_num),clock-1)))
+    ranking.sort(key=lambda x: x[1], reverse=True)
+
+
+    width=win.width
+    height=win.height
+
+    # background rectangle
+    rect=Rectangle(Point(width/2-180,height/2-80),
+                    Point(width/2+180,height/2+80))
+    rect.setFill(color_rgb(30,30,30))  # dark gray
+    rect.setOutline("red")
+    rect.setWidth(3)
+    rect.draw(win)
+
+    
+    # “WASTED”
+    rank_text=Text(Point(width/2,height/2-50),"Global Rank")
+    rank_text.setSize(24)
+    rank_text.setTextColor("red")
+    rank_text.setFace("courier")  
+    rank_text.setStyle("bold")
+    rank_text.draw(win)
+    rank_list = []
+    num=['1st','2nd','3rd','4th','5th']
+    for i in range(len(ranking)):
+        if i>=5:
+            break
+        id_, score = ranking[i]
+        rank_entry = Text(Point(width/2, height/2 - 25 + i*20), f"{num[i]:4} {id_:10}: {score:10}")
+        rank_list.append(rank_entry)
+        rank_entry.setSize(16)
+        rank_entry.setTextColor("white")
+        rank_entry.setFace("courier")
+        rank_entry.draw(win)
+    while True:
+        key = win.checkKey()
+        if key=='a' or key=='A':
+            break
+    for r in rank_list:
+        r.undraw()
+    rect.undraw()
+    rank_text.undraw()
+
 def main():
+    
+    """ there's a big while loop, the system sleeps for every transversal
+        allowing the users to have their eye adjusted to the updates on the screen
+        Every transversal there's an update for every function (trees, dinosaur, pause/death screens, and jump)"""
+
     global gmJump,gmPause,gmDeath,win,last_time,grace_period,dino_x,dino_y,dino_img
 
     win=GraphWin("2D Array Animation", col, row)
@@ -384,16 +479,16 @@ def main():
             # print("%%%")
         # print()
         dino_speed+=g
-        print(dino_speed," ",dino_feet)
+        # print(dino_speed," ",dino_feet)
         if gmJump==1:
             dino_dx=(dino_speed)
             dino_y+=dino_dx
             dino_img.move(0,dino_dx)
-            print(dino_dx)
+            # print(dino_dx)
             # dino_speed+=g*dt
         # =============== move the trees =============== 
         
-        print(tree_speed)
+        # print(tree_speed)
         tree_dx=-tree_speed*dt*60   # 以 60fps 标准化速度
         for tree_img, tree_pli, col_tree, row_tree in trees:
             tree_img.move(tree_dx,0)
@@ -401,7 +496,7 @@ def main():
                 trees.remove((tree_img, tree_pli, col_tree, row_tree))
 
         # ========= check whether the dinosaur died ========= 
-        print(grace_period)
+        # print(grace_period)
         if len(trees)>0:
             tree_img, tree_pli, col_tree, row_tree = trees[0]
             if grace_period==0 and dino_death(dino_img,col_dino,row_dino,tree_img,tree_pli,col_tree,row_tree):
@@ -437,7 +532,9 @@ def main():
 
         
         # =============== record the score ===============
-    win.close()
+    
+    
+    win.close()   
     save_score(clock)
 
 if __name__=='__main__':
