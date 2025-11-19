@@ -63,7 +63,7 @@ def save_score(clock):
 
 def pause(clock):
     """ when the game is paused, the game goes to "sleep" and the menu pops up """
-    global gmPause
+    global gmPause #game is running with all graphics if pause time is 0 (so R key has not been pressed)
     pause_time=0
     rect,menu_text,info_text,score,resume,retry=print_menu(clock)
     rect.draw(win)
@@ -74,10 +74,10 @@ def pause(clock):
     retry.draw(win)
 
 
-    while gmPause==1:
-        pause_time+=0.1
-        key = win.checkKey()
-        if key=='r' or key=='R':
+    while gmPause==1: #while the game is not paused
+        pause_time+=0.1 #this makes sure that the trees are stationary until the R key is pressed to unpause the game
+        key = win.checkKey() #this just makes it easier to read that the function win.checkKey is being checked for
+        if key=='r' or key=='R': #R key pressed AGAIN, then the game continues.
             save_score(clock)
             restart_program()
 
@@ -98,7 +98,7 @@ def add_tree(trees):
     chosen_file = random.choice(tree_files)
     global col,land
     # col_tree,row_tree
-    img = PILImage.open(chosen_file).convert("RGBA")
+    img = PILImage.open(chosen_file).convert("RGBA") #converts the format of the tree file to have transparent background recognized
     # img = img.resize((col_tree, row_tree))  # 例如 (60, 60)
     temp_name = f"tree_temp_{random.randint(0,10)}.png"
     img.save(temp_name)
