@@ -227,7 +227,7 @@ def show_wasted(win,extra_life,clock):
     score.setFace("courier")  
     score.setTextColor("white")
 
-    resume=Text(Point(width/2,height/2+40), f"Press Esc to resume.")
+    resume=Text(Point(width/2,height/2+40), f"Press Return to resume.")
     resume.setSize(9)
     resume.setFace("courier")  
     resume.setTextColor("white") 
