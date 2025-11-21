@@ -1,5 +1,5 @@
-# Dinosaur
-csc110 final project
+# Dinosaur - csc110 final project
+
 # Team Members
 
 Tensae Mekonnen, Mandy Mi, Elizabeth Sarpong
