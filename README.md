@@ -6,7 +6,7 @@ Tensae Mekonnen, Mandy Mi, Elizabeth Sarpong
 
 # Required Files
 
-All files contained in the Dinosaur Repository besides the README.md are required.  Must install a pillow by running pip install pillow to allow transparent pixel recognition. The picture files including dino, dino0, din01, and dino2 are used to simulate the dinosaur running. Users must select the right python file to run, depending on the operating system of the computer. If you’re a windows user download  ( dino_win_ver_1.0.py). If you're a mac user download (dino_mac_ver_1.0.py). 
+All files contained in the Dinosaur Repository besides the README.md are required.  Must install a pillow by running pip install pillow to allow transparent pixel recognition. The picture files including dino, dino0, din01, and dino2 are used to simulate the dinosaur running. Users must select the right python file to run, depending on the operating system of the computer. If you’re a windows user run (dino_win_ver_1.0.py). If you're a mac user run (dino_mac_ver_1.0.py). 
 
 # How to Run
  
