@@ -431,6 +431,7 @@ def main():
     high_score.setFace("courier")  
 
     while win.checkMouse() is None :
+
         current_score.setText(f"current score: {clock}")
         high_score_num = max(int(high_score_num),clock)
         high_score.setText(f"highest score:{high_score_num}")
@@ -444,6 +445,7 @@ def main():
         last_time=now # record the new output timestamp 
         # if tree_speed!=15:
         clock+=1    
+        save_score(clock)
         tree_speed=min(5+0.010*clock,15)
         # print(clock," ",tree_speed," ",g," ",dino_speed)
         

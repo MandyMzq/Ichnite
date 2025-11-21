@@ -445,6 +445,8 @@ def main():
         # if tree_speed!=15:
         clock+=1    
         tree_speed=min(5+0.010*clock,15)
+
+        save_score(clock)
         # print(clock," ",tree_speed," ",g," ",dino_speed)
         
         # =============== randomly add the tree ================
